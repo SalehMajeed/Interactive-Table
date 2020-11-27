@@ -1,8 +1,12 @@
-const remove = document.querySelectorAll('.table-remove');
+function init() {
+  const table_heading = document.querySelector('table > thead > tr');
+  const first_item = document.createElement('th');
+  load_data();
+}
 
-for (const [index, remove_row] of remove.entries()) {
-  remove_row.addEventListener('click', () => {
-    console.log(remove_row);
-    console.log(document.querySelectorAll('tbody > tr')[index].remove());
-  });
+init();
+
+async function load_data() {
+  const data = (await fetch(`./table_heading.json`)).json();
+  data.then((value) => console.log(value));
 }
