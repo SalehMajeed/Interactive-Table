@@ -44,9 +44,9 @@ function get_tr(tbody) {
 }
 
 function update_row(table, tbody) {
-  const empty_child = table.querySelectorAll('td:empty')
+  const empty_child = table.querySelectorAll('td:empty');
 
-  console.log(empty_child)
+  console.log(empty_child);
   const empty_td_length = table.querySelectorAll('td:empty').length;
 
   if (empty_td_length == 0) {
