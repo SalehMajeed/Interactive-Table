@@ -29,6 +29,8 @@ class Table {
         td.setAttribute('contenteditable', 'true');
         return td;
       });
+    td[0].innerText = this.tbody.childElementCount + 1;
+    td[0].removeAttribute('contenteditable');
 
     tr.append(...td);
     return tr;
@@ -76,6 +78,9 @@ class Table {
       ).length;
       if (last_row_length == current_row_length) {
         event.target.parentElement.remove();
+        for (let i = 0; i < this.tbody.childElementCount; i++) {
+          this.tbody.children[i].children[0].innerText = i + 1;
+        }
       }
     }
   }
