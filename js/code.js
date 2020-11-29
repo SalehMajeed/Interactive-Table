@@ -1,16 +1,19 @@
 class Table {
   constructor() {
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
-    const table_div = document.getElementById('table');
+    this.table = document.createElement('table');
+    this.thead = document.createElement('thead');
+    this.tbody = document.createElement('tbody');
+    this.table_div = document.getElementById('table');
 
-    table.append(thead, tbody);
-    table_div.append(table);
+    this.table.setAttribute('border', '1');
+    this.table.append(this.thead, this.tbody);
+    this.table_div.append(this.table);
 
-    thead.append(this.create_thead());
+    this.thead.append(this.create_thead());
 
-    tbody.append(this.create_tbody(thead.rows[0].childElementCount));
+    this.tbody.append(this.create_tbody(this.thead.rows[0].childElementCount));
+
+    table.addEventListener('keyup', (event) => this.update_row(event));
   }
 
   get_row_data(type) {
@@ -21,7 +24,11 @@ class Table {
     const tr = this.get_row_data('tr');
     const td = Array(child_count)
       .fill()
-      .map((each_child) => this.get_row_data('td'));
+      .map((each_child) => {
+        const td = this.get_row_data('td');
+        td.setAttribute('contenteditable', 'true');
+        return td;
+      });
 
     tr.append(...td);
     return tr;
@@ -48,6 +55,29 @@ class Table {
     tr.append(...table_heading);
 
     return tr;
+  }
+
+  update_row(event) {
+    const empty_child = this.tbody.querySelectorAll('tr > td:empty').length;
+
+    if (empty_child == 0) {
+      this.tbody.append(
+        this.create_tbody(this.thead.rows[0].childElementCount)
+      );
+    }
+    if (
+      this.tbody.childElementCount > 1 &&
+      event.target.parentElement != this.tbody.querySelector('tr:last-child')
+    ) {
+      const last_row = this.tbody.querySelector('tr:last-child');
+      const last_row_length = last_row.querySelectorAll('td:empty').length;
+      const current_row_length = event.target.parentElement.querySelectorAll(
+        'td:empty'
+      ).length;
+      if (last_row_length == current_row_length) {
+        event.target.parentElement.remove();
+      }
+    }
   }
 }
 
