@@ -60,28 +60,26 @@ class Table {
   }
 
   update_row(event) {
+    event.target.textContent = event.target.textContent.trim();
     const empty_child = this.tbody.querySelectorAll('tr > td:empty').length;
+    const current_row = event.target.parentElement;
+    const current_row_id = current_row.children[0].innerText;
+    const last_row = this.tbody.querySelector('tr:last-child');
+    const last_row_id = last_row.children[0].innerText;
 
     if (empty_child == 0) {
       this.tbody.append(
         this.create_tbody(this.thead.rows[0].childElementCount)
       );
     }
+
     if (
-      this.tbody.childElementCount > 1 &&
-      event.target.parentElement != this.tbody.querySelector('tr:last-child')
+      current_row_id < last_row_id &&
+      current_row.querySelectorAll('td:empty').length > 0 &&
+      last_row.querySelectorAll('td:empty').length ==
+        this.thead.rows[0].childElementCount - 1
     ) {
-      const last_row = this.tbody.querySelector('tr:last-child');
-      const last_row_length = last_row.querySelectorAll('td:empty').length;
-      const current_row_length = event.target.parentElement.querySelectorAll(
-        'td:empty'
-      ).length;
-      if (last_row_length == current_row_length) {
-        event.target.parentElement.remove();
-        for (let i = 0; i < this.tbody.childElementCount; i++) {
-          this.tbody.children[i].children[0].innerText = i + 1;
-        }
-      }
+      this.tbody.querySelector('tr:last-child').remove();
     }
   }
 }
