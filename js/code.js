@@ -13,7 +13,8 @@ class Table {
 
     this.tbody.append(this.create_tbody(this.thead.rows[0].childElementCount));
 
-    table.addEventListener('keyup', (event) => this.update_row(event));
+    this.table.addEventListener('keyup', (event) => this.update_row(event));
+    this.table.addEventListener('click', (event) => this.sort_table(event));
   }
 
   get_row_data(type) {
@@ -80,6 +81,30 @@ class Table {
         this.thead.rows[0].childElementCount - 1
     ) {
       this.tbody.querySelector('tr:last-child').remove();
+    }
+  }
+
+  sort_table(event) {
+    const thead_elements = Array.from(this.thead.rows[0].children);
+
+    if (thead_elements.includes(event.target)) {
+      this.tbody.classList.toggle('asc');
+      const thead_index = thead_elements.indexOf(event.target);
+
+      let to_be_sort = Array.from(this.tbody.rows).sort((a, b) =>
+        a.children[thead_index].innerText > b.children[thead_index].innerText
+          ? 1
+          : -1
+      );
+
+      while (this.tbody.rows.length)
+        this.tbody.children[this.tbody.rows.length - 1].remove();
+
+      to_be_sort = this.tbody.classList.contains('asc')
+        ? to_be_sort.reverse()
+        : to_be_sort;
+
+      this.tbody.append(...to_be_sort);
     }
   }
 }
