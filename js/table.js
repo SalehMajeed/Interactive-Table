@@ -1,44 +1,44 @@
 class Table {
   constructor() {
     this.table_div = document.getElementById('table');
-    this.options = document.getElementById('options');
-    this.search_input = document.getElementById('search-input');
 
     this.table = document.createElement('table');
     this.thead = document.createElement('thead');
     this.tbody = document.createElement('tbody');
+    this.tfoot = document.createElement('tfoot');
 
-    this.thead_elements = [];
-    this.search_column = null;
+    this.search_column = [];
 
     this.table.setAttribute('border', '1');
-    this.table.append(this.thead, this.tbody);
+    this.table.append(this.tfoot, this.thead, this.tbody);
     this.table_div.append(this.table);
 
     this.thead.append(this.create_thead());
     this.tbody.append(this.create_tbody());
 
-    this.table.addEventListener('keyup', (event) => this.update_row(event));
-    this.table.addEventListener('click', (event) => this.sort_table(event));
-    this.options.addEventListener('click', (event) => this.get_column(event));
-    this.search_input.addEventListener('keyup', (event) => this.search(event));
+    this.tfoot.addEventListener('keyup', (event) => this.search(event));
+    this.thead.addEventListener('click', (event) => this.sort_table(event));
+    this.tbody.addEventListener('keyup', (event) => this.update_row(event));
   }
 
   search(event) {
+    const current_column_text = event.target.value;
+    const current_column = this.search_column.indexOf(
+      event.target.parentElement
+    );
+
     for (const tr of this.tbody.children) {
       const columns_search = tr.children[
-        this.search_column
+        current_column
       ].innerText.toLowerCase();
-      if (columns_search.indexOf(this.search_input.value.toLowerCase()) == 0) {
+      console.log(columns_search);
+
+      if (columns_search.indexOf(current_column_text.toLowerCase()) == 0) {
         tr.style.display = '';
       } else {
         tr.style.display = 'none';
       }
     }
-  }
-
-  get_column(event) {
-    this.search_column = this.thead_elements.indexOf(event.target.value);
   }
 
   update_row(event) {
@@ -110,6 +110,11 @@ class Table {
 
   create_thead() {
     const tr = this.get_row_data('tr');
+    const search_attributes = {
+      type: 'input',
+      placeholder: 'Search...',
+      class: 'search-input',
+    };
 
     const table_heading = [
       '#',
@@ -123,13 +128,20 @@ class Table {
     ].map((th) => {
       const thead = this.get_row_data('th');
 
-      const option = this.get_row_data('option');
-      option.innerText = th;
-      this.options.append(option);
+      const tfoot = this.get_row_data('th');
+      const search_input = this.get_row_data('input');
+
+      for (const attr in search_attributes) {
+        search_input.setAttribute(attr, search_attributes[attr]);
+      }
+
+      this.search_column.push(tfoot);
+
+      tfoot.append(search_input);
+      this.tfoot.append(tfoot);
 
       thead.innerText = th;
 
-      this.thead_elements.push(th);
       return thead;
     });
 
