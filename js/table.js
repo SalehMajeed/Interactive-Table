@@ -1,6 +1,7 @@
 class Table {
   constructor() {
     this.table_div = document.getElementById('table');
+    this.global_search = document.getElementById('global-search');
 
     this.table = document.createElement('table');
     this.thead = document.createElement('thead');
@@ -16,9 +17,32 @@ class Table {
     this.thead.append(this.create_thead());
     this.tbody.append(this.create_tbody());
 
+    this.global_search.addEventListener('keyup', (event) =>
+      this.global_searching(event)
+    );
     this.tfoot.addEventListener('keyup', (event) => this.search(event));
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
+  }
+
+  global_searching(event) {
+    for (const tr of this.tbody.children) {
+      let found = false;
+      for (const td of tr.children) {
+        if (
+          td.innerText
+            .toLowerCase()
+            .indexOf(event.target.value.toLowerCase()) == 0
+        ) {
+          found = true;
+        }
+      }
+      if (found == true) {
+        tr.style.display = '';
+      } else {
+        tr.style.display = 'none';
+      }
+    }
   }
 
   search(event) {
