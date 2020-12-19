@@ -19,29 +19,12 @@ class Table {
     this.thead.append(this.create_thead());
     this.tbody.append(this.create_tbody());
 
-    table.addEventListener('dragstart', (event) => this.dragstart_event(event));
-    table.addEventListener('dragover', (event) => this.dragover_event(event));
-
     this.global_search.addEventListener('keyup', (event) =>
       this.global_searching(event)
     );
     this.tfoot.addEventListener('keyup', (event) => this.search(event));
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
-  }
-
-  dragstart_event(event) {
-    this.row = event.target;
-  }
-
-  dragover_event(event) {
-    var e = event;
-    e.preventDefault();
-
-    let children = Array.from(e.target.parentElement.children);
-    if (children.indexOf(e.target.parentNode) > children.indexOf(this.row))
-      e.target.parentNode.after(this.row);
-    else e.target.parentNode.before(this.row);
   }
 
   global_searching(event) {
