@@ -68,17 +68,15 @@ class Table {
   }
 
   update_row(event) {
-    event.target.textContent = event.target.textContent.trim();
+    // event.target.innerText = event.target.innerText.trim();
     const empty_child = this.tbody.querySelectorAll('tr > td:empty').length;
     const current_row = event.target.parentElement;
-    const current_row_id = current_row.children[0].textContent;
+    const current_row_id = current_row.children[0].innerText;
     const last_row = this.tbody.querySelector('tr:last-child');
-    const last_row_id = last_row.children[0].textContent;
+    const last_row_id = last_row.children[0].innerText;
 
     if (empty_child == 0) {
-      this.tbody.append(
-        this.create_tbody(this.thead.rows[0].childElementCount)
-      );
+      this.tbody.append(this.create_tbody());
     }
 
     if (
@@ -101,15 +99,22 @@ class Table {
         event.target
       );
 
-      let new_values = [...this.tbody.rows].sort((a, b) =>
-        a.children[index_value].innerText > b.children[index_value].innerText
-          ? 1
-          : -1
-      );
+      let new_values = [...this.tbody.rows]
+        .filter((row) => {
+          return (
+            row.querySelectorAll('td:empty').length != thead_elements.length - 1
+          );
+        })
+        .sort((a, b) => {
+          return a.children[index_value].innerText >
+            b.children[index_value].innerText
+            ? 1
+            : -1;
+        });
       new_values = this.tbody.classList.contains('asc')
         ? new_values.reverse()
         : new_values;
-      this.tbody.append(...new_values);
+      this.tbody.prepend(...new_values);
     }
   }
 
