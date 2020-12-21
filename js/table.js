@@ -1,5 +1,9 @@
 class Table {
   constructor() {
+    this.config = {
+      childList: true,
+    };
+
     this.table_div = document.getElementById('table');
     this.global_search = document.getElementById('global-search');
 
@@ -26,7 +30,6 @@ class Table {
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
   }
-
   global_searching(event) {
     for (const tr of this.tbody.children) {
       let found = false;
@@ -47,6 +50,18 @@ class Table {
     }
   }
 
+  create_div() {
+    const div = document.createElement('div');
+
+    div.style.position = 'absolute';
+    div.style.top = 0;
+    div.style.right = 0;
+    div.style.width = `5px`;
+    div.style.height = this.table.offsetHeight + 'px';
+    div.style.backgroundColor = 'green';
+    return div;
+  }
+
   search(event) {
     const current_column_text = event.target.value;
     const current_column = this.search_column.indexOf(
@@ -57,7 +72,6 @@ class Table {
       const columns_search = tr.children[
         current_column
       ].innerText.toLowerCase();
-      console.log(columns_search);
 
       if (columns_search.indexOf(current_column_text.toLowerCase()) == 0) {
         tr.style.display = '';

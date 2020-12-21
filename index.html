@@ -6,30 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        input {
+            width: 100px;
+        }
+
         table {
-            width: 100%;
             border-collapse: collapse;
-        }
-
-        th {
-            cursor: pointer;
-        }
-
-        tr {
-            height: 25px;
+            margin: 0.5em;
+            overflow-x: auto;
         }
 
         td,
         th {
-            padding: 3px;
+            border: 1px solid #ccc;
             text-align: center;
+            padding: 0.5em;
         }
 
-        #search-input {
-            padding: 10px;
-            margin: 10px;
+        td:first-child {
+            cursor: pointer;
+            user-select: none;
         }
 
+        tbody {
+            padding-top: 10px;
+        }
+
+        /* 
+        .column-selector:hover {
+            border-right: 2px solid #0000f;
+        } */
 
         tfoot {
             display: table-header-group
