@@ -13,7 +13,6 @@
         table {
             border-collapse: collapse;
             margin: 0.5em;
-            overflow-x: auto;
         }
 
         td,
@@ -32,13 +31,16 @@
             padding-top: 10px;
         }
 
-        /* 
-        .column-selector:hover {
-            border-right: 2px solid #0000f;
-        } */
-
         tfoot {
             display: table-header-group
+        }
+
+        .resize-column {
+            top: 0;
+            right: 0;
+            width: 5px;
+            user-select: none;
+            cursor: col-resize;
         }
     </style>
 </head>

@@ -3,7 +3,6 @@ class Table {
     this.config = {
       childList: true,
     };
-
     this.table_div = document.getElementById('table');
     this.global_search = document.getElementById('global-search');
 
@@ -11,8 +10,6 @@ class Table {
     this.thead = document.createElement('thead');
     this.tbody = document.createElement('tbody');
     this.tfoot = document.createElement('tfoot');
-
-    this.row = '';
 
     this.search_column = [];
 
@@ -23,13 +20,86 @@ class Table {
     this.thead.append(this.create_thead());
     this.tbody.append(this.create_tbody());
 
+    this.resize_table();
+    this.pagex = null;
+    this.cur_col = null;
+    this.next_col = null;
+    this.cur_col_width = null;
+    this.next_col_width = null;
+
     this.global_search.addEventListener('keyup', (event) =>
       this.global_searching(event)
     );
+    this.observe_change = new MutationObserver(() => this.obeserver_callback());
+
     this.tfoot.addEventListener('keyup', (event) => this.search(event));
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
+    this.table.addEventListener('mousedown', (event) => this.mouse_down(event));
+
+    this.observe_change.observe(this.tbody, this.config);
   }
+
+  mouse_down(event) {
+    if (event.target.className == 'resize-column') {
+      this.cur_col = event.target.parentElement;
+      this.next_col = this.cur_col.nextElementSibling;
+      this.pagex = event.pageX;
+      this.cur_col_width = this.cur_col.offsetWidth;
+      if (this.next_col) {
+        this.next_col_width = this.next_col.offsetWidth;
+      }
+
+      this.table.addEventListener('mousemove', (event) =>
+        this.mouse_move(event)
+      );
+      this.table.addEventListener('mouseup', (event) => this.mouse_up(event));
+    }
+  }
+
+  mouse_move(event) {
+    if (this.cur_col) {
+      const diffx = event.pageX - this.pagex;
+
+      if (this.next_col) {
+        this.next_col.style.width = this.next_col_width - diffx + 'px';
+      }
+
+      this.cur_col.style.width = this.cur_col_width + diffx + 'px';
+    }
+  }
+  mouse_up() {
+    this.pagex = null;
+    this.cur_col = null;
+    this.next_col = null;
+    this.cur_col_width = null;
+    this.next_col_width = null;
+  }
+
+  obeserver_callback = () => {
+    this.resize_table();
+  };
+
+  resize_table() {
+    for (const td of this.thead.children[0].children) {
+      const div = this.create_div();
+      if (td.children[0]) {
+        td.children[0].remove();
+      }
+
+      td.append(div);
+      td.style.position = 'relative';
+    }
+  }
+
+  create_div() {
+    const div = document.createElement('div');
+    div.classList.add('resize-column');
+    div.style.position = 'absolute';
+    div.style.height = `${this.table.offsetHeight + 15}px`;
+    return div;
+  }
+
   global_searching(event) {
     for (const tr of this.tbody.children) {
       let found = false;
@@ -50,18 +120,6 @@ class Table {
     }
   }
 
-  create_div() {
-    const div = document.createElement('div');
-
-    div.style.position = 'absolute';
-    div.style.top = 0;
-    div.style.right = 0;
-    div.style.width = `5px`;
-    div.style.height = this.table.offsetHeight + 'px';
-    div.style.backgroundColor = 'green';
-    return div;
-  }
-
   search(event) {
     const current_column_text = event.target.value;
     const current_column = this.search_column.indexOf(
@@ -72,6 +130,7 @@ class Table {
       const columns_search = tr.children[
         current_column
       ].innerText.toLowerCase();
+      console.log(columns_search);
 
       if (columns_search.indexOf(current_column_text.toLowerCase()) == 0) {
         tr.style.display = '';
