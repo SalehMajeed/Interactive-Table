@@ -18,6 +18,7 @@ class Table {
     this.table_div.append(this.table);
 
     this.thead.append(this.create_thead());
+    this.tfoot.append(this.create_tfoot());
     this.tbody.append(this.create_tbody());
 
     this.resize_table();
@@ -27,6 +28,7 @@ class Table {
     this.cur_col_width = null;
     this.next_col_width = null;
 
+    this.create_tfoot()
     this.global_search.addEventListener('keyup', (event) =>
       this.global_searching(event)
     );
@@ -195,6 +197,22 @@ class Table {
     return document.createElement(type);
   }
 
+  create_tfoot() {
+    const tr = this.get_row_data('tr')
+    const td = Array(this.thead.children[0].childElementCount).fill().map(each_child => {
+      const td = this.get_row_data('td')
+      const span = this.get_row_data('span')
+      span.innerText = 'hello'
+      span.setAttribute('contenteditable',true)
+      td.append(span)
+      return td
+    }  
+    )
+    tr.append(...td)
+return tr
+  }
+  
+
   create_tbody() {
     const child_count = this.thead.querySelector('tr').childElementCount;
     const tr = this.get_row_data('tr');
@@ -232,18 +250,6 @@ class Table {
       'City',
     ].map((th) => {
       const thead = this.get_row_data('th');
-
-      const tfoot = this.get_row_data('th');
-      const search_input = this.get_row_data('input');
-
-      for (const attr in search_attributes) {
-        search_input.setAttribute(attr, search_attributes[attr]);
-      }
-
-      this.search_column.push(tfoot);
-
-      tfoot.append(search_input);
-      this.tfoot.append(tfoot);
 
       thead.innerText = th;
 
