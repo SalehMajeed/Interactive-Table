@@ -8,12 +8,89 @@ class table {
     this.tfoot = document.createElement('tfoot');
 
     this.init();
+    this.change_height();
+    this.obeser_change();
 
     this.global_search.addEventListener('keyup', (event) =>
       this.global_searching(event)
     );
+
+    this.table.addEventListener('mousedown', (event) => this.mouse_down(event));
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
+    this.tbody.addEventListener('focusout', (event) => this.trimmed_row(event));
+  }
+
+  mouse_down(event) {
+    if (event.srcElement.className == 'resize-column') {
+      let event_elements = {
+        pagex: null,
+        cur_col: null,
+        next_col: null,
+        cur_col_width: null,
+        next_col_width: null,
+      };
+      event_elements.cur_col = event.target.parentElement;
+      event_elements.next_col = event_elements.cur_col.nextElementSibling;
+      event_elements.pagex = event.pageX;
+      event_elements.cur_col_width = event_elements.cur_col.offsetWidth;
+      if (event_elements.next_col) {
+        event_elements.next_col_width = event_elements.next_col.offsetWidth;
+      }
+
+      document.addEventListener('mousemove', (event) =>
+        this.mouse_move({ event, event_elements, type: 'resize' })
+      );
+      document.addEventListener('mouseup', (event) =>
+        this.mouse_up({ event, event_elements, type: 'resize' })
+      );
+    }
+  }
+
+  mouse_move({ event, event_elements, type }) {
+    if (type == 'resize') {
+      if (event_elements.cur_col) {
+        const diffx = event.pageX - event_elements.pagex;
+
+        if (event_elements.next_col) {
+          event_elements.next_col.style.width =
+            event_elements.next_col_width - diffx + 'px';
+        }
+
+        event_elements.cur_col.style.width =
+          event_elements.cur_col_width + diffx + 'px';
+      }
+    }
+  }
+  mouse_up({ event, event_elements, type }) {
+    if (type == 'resize') {
+      for (const elements in event_elements) {
+        delete event_elements[elements];
+      }
+      // event_elements = {};
+
+      // document.removeEventListener('mousedown', this.mouse_down);
+      // document.removeEventListener('mousemove', this.mouse_move)
+      // document.removeEventListener('mouseup', this.mouse_up);
+    }
+  }
+
+  trimmed_row(event) {
+    event.target.innerText = event.target.innerText.trim();
+  }
+
+  obeser_change() {
+    const change = new MutationObserver(this.change_height);
+    change.observe(this.tbody, { childList: true });
+  }
+
+  change_height() {
+    const div = document.getElementsByClassName('resize-column');
+    for (const div_height of div) {
+      div_height.style.height = `${
+        document.querySelector('table').clientHeight
+      }px`;
+    }
   }
 
   global_searching(event) {
@@ -26,6 +103,7 @@ class table {
             .indexOf(event.target.value.toLowerCase()) == 0
         ) {
           found = true;
+          break;
         }
       }
       if (found == true) {
@@ -62,24 +140,23 @@ class table {
   }
 
   update_row(event) {
-    if (event.code == 'Space' || event.code == 'Tab') return;
-    const empty_child = event.target.parentElement.querySelectorAll('td:empty')
-      .length;
+    if (event.code == 'Space' || event.code == 'Tab') {
+      return;
+    }
+
+    const current_row = event.target.parentElement;
     const last_row = this.tbody.querySelector('tr:last-child');
     const last_row_child = last_row.querySelectorAll('td:empty').length;
-    if (
-      empty_child == 0 &&
-      this.tbody.querySelectorAll('td:empty').length == 0
-    ) {
+
+    if (this.tbody.querySelectorAll('td:empty').length == 0) {
       this.tbody.append(this.create_tbody());
     }
 
     if (
       this.tbody.childElementCount > 1 &&
-      empty_child > 0 &&
-      last_row_child == this.thead.firstChild.childElementCount - 1
+      current_row.querySelectorAll('td:empty').length > 0 &&
+      last_row_child == current_row.childElementCount - 1
     ) {
-      console.log(empty_child);
       last_row.remove();
     }
   }
@@ -147,6 +224,12 @@ class table {
     ].map((each_column) => {
       const th = this.create_element('th');
       th.innerHTML = each_column;
+
+      const div = document.createElement('div');
+      div.classList.add('resize-column');
+      th.append(div);
+      th.style.position = 'relative';
+
       return th;
     });
     tr.append(...table_heading);
