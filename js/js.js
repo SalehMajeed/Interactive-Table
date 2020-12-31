@@ -17,6 +17,9 @@ class table {
 
     this.table.addEventListener('mousedown', (event) => this.mouse_down(event));
     this.thead.addEventListener('click', (event) => this.sort_table(event));
+    this.tfoot.addEventListener('keyup', (event) =>
+      this.search_by_column(event)
+    );
     this.tbody.addEventListener('keyup', (event) => this.update_row(event));
     this.tbody.addEventListener('focusout', (event) => this.trimmed_row(event));
   }
@@ -67,7 +70,6 @@ class table {
       for (const elements in event_elements) {
         delete event_elements[elements];
       }
-      // event_elements = {};
 
       // document.removeEventListener('mousedown', this.mouse_down);
       // document.removeEventListener('mousemove', this.mouse_move)
@@ -90,6 +92,27 @@ class table {
       div_height.style.height = `${
         document.querySelector('table').clientHeight
       }px`;
+    }
+  }
+
+  search_by_column(event) {
+    if (event.srcElement.localName == 'input') {
+      const column_index = [...this.tfoot.firstElementChild.children].indexOf(
+        event.target.parentElement
+      );
+
+      const len = this.tbody.childElementCount;
+      for (const tr of this.tbody.children) {
+        const column_text = tr.children[column_index].innerText
+          .trim()
+          .toLowerCase();
+        const search_string = event.target.value.trim().toLowerCase();
+        if (column_text.indexOf(search_string) == 0) {
+          tr.style.display = '';
+        } else {
+          tr.style.display = 'none';
+        }
+      }
     }
   }
 
@@ -198,10 +221,9 @@ class table {
       .fill()
       .map((each_child) => {
         const th = this.create_element('th');
-        const span = this.create_element('span');
-        span.setAttribute('contenteditable', 'true');
+        const span = this.create_element('input');
         span.setAttribute('placeholder', 'Search...');
-        span.innerText = 'hello';
+        span.style.width = `55px`;
         th.append(span);
         return th;
       });
