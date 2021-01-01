@@ -73,8 +73,8 @@ class table {
   }
 
   obeser_change() {
-    const change = new MutationObserver(this.change_height);
-    change.observe(this.tbody, { childList: true });
+    const size_observe = new ResizeObserver(this.change_height);
+    size_observe.observe(this.table, { childList: true });
   }
 
   change_height() {
