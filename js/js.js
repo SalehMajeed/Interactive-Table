@@ -6,6 +6,13 @@ class table {
     this.thead = document.createElement('thead');
     this.tbody = document.createElement('tbody');
     this.tfoot = document.createElement('tfoot');
+    this.event_elements = {
+      pagex: null,
+      cur_col: null,
+      next_col: null,
+      cur_col_width: null,
+      next_col_width: null,
+    };
 
     this.init();
     this.change_height();
@@ -15,7 +22,7 @@ class table {
       this.global_searching(event)
     );
 
-    this.table.addEventListener('mousedown', (event) => this.mouse_down(event));
+    this.table.addEventListener('mousedown', this.mouse_down);
     this.thead.addEventListener('click', (event) => this.sort_table(event));
     this.tfoot.addEventListener('keyup', (event) =>
       this.search_by_column(event)
@@ -24,58 +31,42 @@ class table {
     this.tbody.addEventListener('focusout', (event) => this.trimmed_row(event));
   }
 
-  mouse_down(event) {
+  mouse_down = (event) => {
     if (event.srcElement.className == 'resize-column') {
-      let event_elements = {
-        pagex: null,
-        cur_col: null,
-        next_col: null,
-        cur_col_width: null,
-        next_col_width: null,
-      };
-      event_elements.cur_col = event.target.parentElement;
-      event_elements.next_col = event_elements.cur_col.nextElementSibling;
-      event_elements.pagex = event.pageX;
-      event_elements.cur_col_width = event_elements.cur_col.offsetWidth;
-      if (event_elements.next_col) {
-        event_elements.next_col_width = event_elements.next_col.offsetWidth;
+      this.event_elements.cur_col = event.target.parentElement;
+      this.event_elements.next_col = this.event_elements.cur_col.nextElementSibling;
+      this.event_elements.pagex = event.pageX;
+      this.event_elements.cur_col_width = this.event_elements.cur_col.offsetWidth;
+      if (this.event_elements.next_col) {
+        this.event_elements.next_col_width = this.event_elements.next_col.offsetWidth;
       }
 
-      document.addEventListener('mousemove', (event) =>
-        this.mouse_move({ event, event_elements, type: 'resize' })
-      );
-      document.addEventListener('mouseup', (event) =>
-        this.mouse_up({ event, event_elements, type: 'resize' })
-      );
+      document.addEventListener('mousemove', this.resize_column);
+      document.addEventListener('mouseup', this.mouse_up);
     }
-  }
+  };
 
-  mouse_move({ event, event_elements, type }) {
-    if (type == 'resize') {
-      if (event_elements.cur_col) {
-        const diffx = event.pageX - event_elements.pagex;
+  resize_column = (event) => {
+    if (this.event_elements.cur_col) {
+      const diffx = event.pageX - this.event_elements.pagex;
 
-        if (event_elements.next_col) {
-          event_elements.next_col.style.width =
-            event_elements.next_col_width - diffx + 'px';
-        }
-
-        event_elements.cur_col.style.width =
-          event_elements.cur_col_width + diffx + 'px';
-      }
-    }
-  }
-  mouse_up({ event, event_elements, type }) {
-    if (type == 'resize') {
-      for (const elements in event_elements) {
-        delete event_elements[elements];
+      if (this.event_elements.next_col) {
+        this.event_elements.next_col.style.width =
+          this.event_elements.next_col_width - diffx + 'px';
       }
 
-      // document.removeEventListener('mousedown', this.mouse_down);
-      // document.removeEventListener('mousemove', this.mouse_move)
-      // document.removeEventListener('mouseup', this.mouse_up);
+      this.event_elements.cur_col.style.width =
+        this.event_elements.cur_col_width + diffx + 'px';
     }
-  }
+  };
+
+  mouse_up = (event) => {
+    this.event_elements = {};
+
+    document.removeEventListener('mousedown', this.mouse_down);
+    document.removeEventListener('mousemove', this.resize_column);
+    document.removeEventListener('mouseup', this.mouse_up);
+  };
 
   trimmed_row(event) {
     event.target.innerText = event.target.innerText.trim();
